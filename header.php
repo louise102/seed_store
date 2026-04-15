@@ -4,7 +4,7 @@
     <nav class="site-nav">
       <a href="index.php">Home</a>
       <a href="product.php">Products</a>
-      <a href="addproduct.php">Categories</a>
+      <a href="categories.php">Categories</a>
       <a href="aboutus.php">About</a>
       <a href="contact.php">Contact</a>
       <a class="btn btn-primary" href="cart.php">Cart</a>
