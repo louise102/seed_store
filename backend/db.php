@@ -1,10 +1,10 @@
 x<?php
 $env_file = __DIR__ . '/.env';
 $env = file_exists($env_file) ? parse_ini_file($env_file) : [];
-$host = $env['DB_HOST'] ?? '127.0.0.1';
-$db   = $env['DB_NAME'] ?? 'seed_store';
-$user = $env['DB_USER'] ?? 'root';
-$pass = $env['DB_PASS'] ?? '';
+$host = $env['DB_HOST'] ?? 'sql113.infinityfree.com';
+$db   = $env['DB_NAME'] ?? 'if0_41631401_seeds_db';
+$user = $env['DB_USER'] ?? 'if0_41631401';
+$pass = $env['DB_PASS'] ?? 'KFaZCv72ShD';
 $dsn  = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 
 $options = [
