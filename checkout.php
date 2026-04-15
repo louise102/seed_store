@@ -1,9 +1,32 @@
 <?php
 session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 require 'backend/db.php';
 if (!isset($_SESSION['user'])) { 
     header('Location: login.php'); 
     exit; 
+}
+function ensureOrderColumns(PDO $pdo) {
+    try {
+        $existing = [];
+        $stmt = $pdo->query("SHOW COLUMNS FROM orders");
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $existing[] = $row['Field'];
+        }
+        if (!in_array('payment_method', $existing, true)) {
+            $pdo->exec("ALTER TABLE orders ADD COLUMN payment_method VARCHAR(50) DEFAULT 'Cash on Delivery'");
+        }
+        if (!in_array('tracking_number', $existing, true)) {
+            $pdo->exec("ALTER TABLE orders ADD COLUMN tracking_number VARCHAR(20)");
+        }
+        if (!in_array('gcash_number', $existing, true)) {
+            $pdo->exec("ALTER TABLE orders ADD COLUMN gcash_number VARCHAR(100)");
+        }
+    } catch (PDOException $e) {
+        // Ignore schema updates when not allowed; the main insert will still show the real error.
+    }
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Simple checkout, assume payment success
@@ -19,10 +42,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $price = $stmt->fetchColumn();
             $total += $price * $qty;
         }
+        // Ensure required order columns exist before insert
+        ensureOrderColumns($pdo);
         // Generate tracking number
         $tracking_number = 'TRK' . strtoupper(substr(md5(uniqid()), 0, 8));
-        $stmt = $pdo->prepare("INSERT INTO orders (user_id, total, status, payment_method, tracking_number, gcash_number) VALUES (?, ?, 'pending', ?, ?, ?)");
-        $stmt->execute([$user_id, $total, $payment_method, $tracking_number, $gcash_number]);
+        try {
+            $stmt = $pdo->prepare("INSERT INTO orders (user_id, total, status, payment_method, tracking_number, gcash_number) VALUES (?, ?, 'pending', ?, ?, ?)");
+            $stmt->execute([$user_id, $total, $payment_method, $tracking_number, $gcash_number]);
+        } catch (PDOException $e) {
+            die('Checkout failed: ' . htmlspecialchars($e->getMessage()));
+        }
         $order_id = $pdo->lastInsertId();
         foreach ($cart as $id => $qty) {
             $pdo->prepare("INSERT INTO order_items (order_id, product_id, qty) VALUES (?, ?, ?)")->execute([$order_id, $id, $qty]);
@@ -80,22 +109,27 @@ foreach ($cart as $id => $qty) {
           </div>
           <div id="gcash-fields" style="display: none;">
             <label>GCash Number</label>
-            <input type="text" name="gcash_number" placeholder="Enter your GCash number" required>
+            <input type="text" name="gcash_number" placeholder="Enter your GCash number">
             <p style="margin-top: 16px;">Scan the QR code below to pay ₱<?=$total?> to the provided GCash number:</p>
             <div id="qr-code" style="text-align: center; margin-top: 16px;"></div>
           </div>
           <script>
+            const gcashInput = document.querySelector('input[name="gcash_number"]');
             document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
               radio.addEventListener('change', function() {
                 const gcashFields = document.getElementById('gcash-fields');
                 if (this.value === 'GCash') {
                   gcashFields.style.display = 'block';
+                  gcashInput.required = true;
                 } else {
                   gcashFields.style.display = 'none';
+                  gcashInput.required = false;
+                  gcashInput.value = '';
+                  document.getElementById('qr-code').innerHTML = '';
                 }
               });
             });
-            document.querySelector('input[name="gcash_number"]').addEventListener('input', function() {
+            gcashInput.addEventListener('input', function() {
               const number = this.value;
               const total = <?=$total?>;
               if (number) {
