@@ -44,8 +44,8 @@ $items = $stmt->fetchAll();
       <p style="font-size: 2.2rem; color: var(--accent2); margin: 8px 0;">₱<?=$order['total']?></p>
       <p>Placed on <?php echo date('M j, Y \\a\\t g:i A', strtotime($order['created_at'])); ?></p>
       <p><strong>Payment Method:</strong> <?php echo htmlspecialchars($order['payment_method']); ?></p>
-      <?php if ($order['payment_method'] === 'GCash' && $order['gcash_ref']): ?>
-        <p><strong>GCash Reference:</strong> <?php echo htmlspecialchars($order['gcash_ref']); ?></p>
+      <?php if ($order['payment_method'] === 'GCash' && $order['gcash_number']): ?>
+        <p><strong>GCash Number:</strong> <?php echo htmlspecialchars($order['gcash_number']); ?></p>
       <?php endif; ?>
       <p><strong>Tracking Number:</strong> <?php echo htmlspecialchars($order['tracking_number']); ?></p>
     </div>

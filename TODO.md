@@ -7,5 +7,5 @@
 - [ ] Test application pages (e.g., open list.php in browser)
 
 ## Database Update for Payment Methods
-- [ ] Run the ALTER TABLE statements in alter_orders.sql in your database (phpMyAdmin or SQL console) to add payment_method, tracking_number, and gcash_ref columns to the orders table.
+- [ ] Run the ALTER TABLE statements in alter_orders.sql in your database (phpMyAdmin or SQL console) to add payment_method, tracking_number, and gcash_number columns to the orders table.
 

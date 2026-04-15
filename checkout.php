@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_SESSION['user']['id'];
     $cart = $_SESSION['cart'] ?? [];
     $payment_method = $_POST['payment_method'] ?? 'Cash on Delivery';
-    $gcash_ref = $_POST['gcash_ref'] ?? '';
+    $gcash_number = $_POST['gcash_number'] ?? '';
     if ($cart) {
         $total = 0;
         foreach ($cart as $id => $qty) {
@@ -21,8 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         // Generate tracking number
         $tracking_number = 'TRK' . strtoupper(substr(md5(uniqid()), 0, 8));
-        $stmt = $pdo->prepare("INSERT INTO orders (user_id, total, status, payment_method, tracking_number, gcash_ref) VALUES (?, ?, 'pending', ?, ?, ?)");
-        $stmt->execute([$user_id, $total, $payment_method, $tracking_number, $gcash_ref]);
+        $stmt = $pdo->prepare("INSERT INTO orders (user_id, total, status, payment_method, tracking_number, gcash_number) VALUES (?, ?, 'pending', ?, ?, ?)");
+        $stmt->execute([$user_id, $total, $payment_method, $tracking_number, $gcash_number]);
         $order_id = $pdo->lastInsertId();
         foreach ($cart as $id => $qty) {
             $pdo->prepare("INSERT INTO order_items (order_id, product_id, qty) VALUES (?, ?, ?)")->execute([$order_id, $id, $qty]);
@@ -79,8 +79,10 @@ foreach ($cart as $id => $qty) {
             </label>
           </div>
           <div id="gcash-fields" style="display: none;">
-            <label>GCash Reference Number</label>
-            <input type="text" name="gcash_ref" placeholder="Enter GCash reference number">
+            <label>GCash Number</label>
+            <input type="text" name="gcash_number" placeholder="Enter your GCash number" required>
+            <p style="margin-top: 16px;">Scan the QR code below to pay ₱<?=$total?> to the provided GCash number:</p>
+            <div id="qr-code" style="text-align: center; margin-top: 16px;"></div>
           </div>
           <script>
             document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
@@ -92,6 +94,17 @@ foreach ($cart as $id => $qty) {
                   gcashFields.style.display = 'none';
                 }
               });
+            });
+            document.querySelector('input[name="gcash_number"]').addEventListener('input', function() {
+              const number = this.value;
+              const total = <?=$total?>;
+              if (number) {
+                const qrData = `GCash Payment: Number ${number}, Amount ₱${total}`;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}`;
+                document.getElementById('qr-code').innerHTML = `<img src="${qrUrl}" alt="GCash QR Code">`;
+              } else {
+                document.getElementById('qr-code').innerHTML = '';
+              }
             });
           </script>
           <button type="submit" class="btn btn-primary auth-submit">Place Order - ₱<?=$total?></button>
