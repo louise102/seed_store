@@ -1,4 +1,4 @@
-x<?php
+<?php
 $env_file = __DIR__ . '/.env';
 $env = file_exists($env_file) ? parse_ini_file($env_file) : [];
 $host = $env['DB_HOST'] ?? 'sql113.infinityfree.com';
