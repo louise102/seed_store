@@ -9,6 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Simple checkout, assume payment success
     $user_id = $_SESSION['user']['id'];
     $cart = $_SESSION['cart'] ?? [];
+    $payment_method = $_POST['payment_method'] ?? 'Cash on Delivery';
+    $gcash_ref = $_POST['gcash_ref'] ?? '';
     if ($cart) {
         $total = 0;
         foreach ($cart as $id => $qty) {
@@ -17,8 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $price = $stmt->fetchColumn();
             $total += $price * $qty;
         }
-        $stmt = $pdo->prepare("INSERT INTO orders (user_id, total, status) VALUES (?, ?, 'pending')");
-        $stmt->execute([$user_id, $total]);
+        // Generate tracking number
+        $tracking_number = 'TRK' . strtoupper(substr(md5(uniqid()), 0, 8));
+        $stmt = $pdo->prepare("INSERT INTO orders (user_id, total, status, payment_method, tracking_number, gcash_ref) VALUES (?, ?, 'pending', ?, ?, ?)");
+        $stmt->execute([$user_id, $total, $payment_method, $tracking_number, $gcash_ref]);
         $order_id = $pdo->lastInsertId();
         foreach ($cart as $id => $qty) {
             $pdo->prepare("INSERT INTO order_items (order_id, product_id, qty) VALUES (?, ?, ?)")->execute([$order_id, $id, $qty]);
@@ -63,22 +67,34 @@ foreach ($cart as $id => $qty) {
         <p class="auth-divider"><span>Seeds ship in 2-5 days</span></p>
       </div>
       <div>
-        <h3>Payment</h3>
-        <p>We accept all major cards. Secure checkout.</p>
+        <h3>Payment Method</h3>
+        <p>Choose your payment method.</p>
         <form method="post" class="auth-form">
-          <label>Card Number</label>
-          <input type="text" placeholder="1234 5678 9012 3456" required>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div>
-              <label>Expiry</label>
-              <input type="month" required>
-            </div>
-            <div>
-              <label>CVV</label>
-              <input type="text" placeholder="123" required>
-            </div>
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; margin-bottom: 8px;">
+              <input type="radio" name="payment_method" value="Cash on Delivery" checked> Cash on Delivery
+            </label>
+            <label style="display: block; margin-bottom: 8px;">
+              <input type="radio" name="payment_method" value="GCash"> GCash
+            </label>
           </div>
-          <button type="submit" class="btn btn-primary auth-submit">Pay ₱<?=$total?></button>
+          <div id="gcash-fields" style="display: none;">
+            <label>GCash Reference Number</label>
+            <input type="text" name="gcash_ref" placeholder="Enter GCash reference number">
+          </div>
+          <script>
+            document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+              radio.addEventListener('change', function() {
+                const gcashFields = document.getElementById('gcash-fields');
+                if (this.value === 'GCash') {
+                  gcashFields.style.display = 'block';
+                } else {
+                  gcashFields.style.display = 'none';
+                }
+              });
+            });
+          </script>
+          <button type="submit" class="btn btn-primary auth-submit">Place Order - ₱<?=$total?></button>
         </form>
       </div>
     </div>
