@@ -6,8 +6,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($username === 'admin' && $password === 'admin') {
         $_SESSION['admin'] = true;
         header('Location: dashboard.php');
+        exit;
     } else {
-        $error = 'Invalid credentials';
+        $error = 'Invalid credentials. Username: ' . htmlspecialchars($username) . ', Password length: ' . strlen($password);
     }
 }
 ?>
