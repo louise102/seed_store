@@ -3,12 +3,12 @@ session_start();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
-    if ($username === 'admin' && $password === 'admin') {
+    if ($username === 'admin@gmail.com' && $password === 'admin') {
         $_SESSION['admin'] = true;
         header('Location: dashboard.php');
         exit;
     } else {
-        $error = 'Invalid credentials. Username: ' . htmlspecialchars($username) . ', Password length: ' . strlen($password);
+        $error = 'Invalid credentials. Email: ' . htmlspecialchars($username) . ', Password length: ' . strlen($password);
     }
 }
 ?>
@@ -34,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form method="post" class="auth-form">
-      <label>Username</label>
-      <input name="username" placeholder="admin" required>
+      <label>Email</label>
+      <input name="username" placeholder="admin@gmail.com" required>
 
       <label>Password</label>
       <input name="password" type="password" placeholder="********" required>
