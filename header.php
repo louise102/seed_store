@@ -8,6 +8,10 @@
       <a href="aboutus.php">About</a>
       <a href="contact.php">Contact</a>
       <a class="btn btn-primary" href="cart.php">Cart</a>
+      <form action="product.php" method="get" style="display: inline; margin-left: 12px;">
+        <input type="text" name="search" placeholder="Search products..." style="padding: 0.5rem; border: 1px solid #ccc; border-radius: 0.5rem; width: 150px;">
+        <button type="submit" class="btn btn-secondary" style="margin-left: 4px; padding: 0.5rem 1rem;">Search</button>
+      </form>
       <?php
       if (session_status() === PHP_SESSION_NONE) {
           session_start();

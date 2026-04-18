@@ -55,7 +55,7 @@ if ($_SESSION['cart']) {
             <tr style="background: var(--panel);">
               <th style="padding: 16px 12px; text-align: left; border-bottom: 2px solid var(--accent2); font-weight: 700;">Product</th>
               <th style="padding: 16px 12px; text-align: center; border-bottom: 2px solid var(--accent2); font-weight: 700;">Price</th>
-              <th style="padding: 16px 12px; text-align: center; border-bottom: 2px solid var(--accent2); font-weight: 700;>Quantity</th>
+              <th style="padding: 16px 12px; text-align: center; border-bottom: 2px solid var(--accent2); font-weight: 700;">Quantity</th>
               <th style="padding: 16px 12px; text-align: center; border-bottom: 2px solid var(--accent2); font-weight: 700;">Total</th>
               <th style="padding: 16px 12px; text-align: center; border-bottom: 2px solid var(--accent2); font-weight: 700;">Action</th>
             </tr>
@@ -65,6 +65,7 @@ if ($_SESSION['cart']) {
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 16px 12px;"><?php echo htmlspecialchars($item['name']); ?></td>
               <td style="padding: 16px 12px; text-align: center;">₱<?=$item['price']?></td>
+              <td style="padding: 16px 12px; text-align: center;"><?=$item['qty']?></td>
               <td style="padding: 16px 12px; text-align: center; font-weight: 600; color: var(--accent2);">₱<?=$item['item_total']?></td>
               <td style="padding: 16px 12px; text-align: center;">
                 <a href="?remove=<?=$item['id']?>" class="btn" style="padding: 8px 16px; background: #dc3545; color: white; text-decoration: none; border-radius: 6px; font-size: 0.9rem;">Remove</a>

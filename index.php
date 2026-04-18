@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Grow your dreams with organic seeds. Premium collection of organic and heirloom seeds for your garden.">
+  <meta name="keywords" content="seeds, organic, heirloom, garden, farming">
   <title>Seed Store - Home</title>
   <link rel="stylesheet" href="style.css">
   <script src="script.js" defer></script>
