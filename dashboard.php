@@ -21,6 +21,12 @@ if (isset($_GET['deliver'])) {
 }
 $products = $pdo->query("SELECT * FROM products ORDER BY category, name")->fetchAll();
 $orders = $pdo->query("SELECT o.*, c.name as username FROM orders o JOIN customers c ON o.user_id = c.id ORDER BY o.created_at DESC")->fetchAll();
+$order_items = $pdo->query("SELECT oi.order_id, oi.qty, p.name FROM order_items oi JOIN products p ON oi.product_id = p.id ORDER BY oi.order_id")->fetchAll();
+
+$order_items_by_order = [];
+foreach ($order_items as $item) {
+    $order_items_by_order[$item['order_id']][] = $item;
+}
 
 // Group products by category
 $products_by_category = [];
@@ -96,6 +102,7 @@ foreach ($products as $p) {
             <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--accent2);">Customer</th>
             <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--accent2);">Total</th>
             <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--accent2);">Status</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--accent2);">Items</th>
             <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--accent2);">Payment Method</th>
             <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--accent2);">Date</th>
             <th style="padding: 12px; text-align: left; border-bottom: 2px solid var(--accent2);">Actions</th>
@@ -115,6 +122,19 @@ foreach ($products as $p) {
                       else echo 'background: #f8d7da; color: #721c24;'; ?>">
                 <?php echo ucfirst($o['status']); ?>
               </span>
+            </td>
+            <td style="padding: 12px;">
+              <?php
+                $items = $order_items_by_order[$o['id']] ?? [];
+                if ($items):
+                    $summary = array_map(function($item) {
+                        return $item['name'] . ' x' . $item['qty'];
+                    }, $items);
+                    echo htmlspecialchars(implode(', ', $summary));
+                else:
+                    echo 'No items';
+                endif;
+              ?>
             </td>
             <td style="padding: 12px;"><?php echo htmlspecialchars($o['payment_method'] ?? 'N/A'); ?></td>
             <td style="padding: 12px;"><?php echo date('M j, Y', strtotime($o['created_at'])); ?></td>

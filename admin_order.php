@@ -10,7 +10,7 @@ if (!isset($_GET['id'])) {
 }
 $order_id = (int)$_GET['id'];
 require 'backend/db.php';
-$stmt = $pdo->prepare("SELECT o.*, u.username, u.email FROM orders o JOIN users u ON o.user_id = u.id WHERE o.id = ?");
+$stmt = $pdo->prepare("SELECT o.*, c.name as username, c.email FROM orders o JOIN customers c ON o.user_id = c.id WHERE o.id = ?");
 $stmt->execute([$order_id]);
 $order = $stmt->fetch();
 if (!$order) {

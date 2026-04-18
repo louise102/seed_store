@@ -15,6 +15,9 @@ function ensureOrderColumns(PDO $pdo) {
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $existing[] = $row['Field'];
         }
+            if (!in_array('status', $existing, true)) {
+            $pdo->exec("ALTER TABLE orders ADD COLUMN status VARCHAR(50) DEFAULT 'pending'");
+        }
         if (!in_array('payment_method', $existing, true)) {
             $pdo->exec("ALTER TABLE orders ADD COLUMN payment_method VARCHAR(50) DEFAULT 'Cash on Delivery'");
         }

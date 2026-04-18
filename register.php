@@ -1,12 +1,28 @@
 <?php
+$error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-require 'backend/db.php';
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare("INSERT INTO customers (name, email, password) VALUES (?, ?, ?)");
-    $stmt->execute([$name, $email, $password]);
-    header('Location: login.php');
+    require 'backend/db.php';
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+
+    if (!$name || !$email || !$password) {
+        $error = 'Please fill in all fields.';
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = 'Please enter a valid email address.';
+    } else {
+        $stmt = $pdo->prepare("SELECT id FROM customers WHERE email = ?");
+        $stmt->execute([$email]);
+        if ($stmt->fetch()) {
+            $error = 'That email is already registered. Please log in or use a different email.';
+        } else {
+            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+            $stmt = $pdo->prepare("INSERT INTO customers (name, email, password) VALUES (?, ?, ?)");
+            $stmt->execute([$name, $email, $passwordHash]);
+            header('Location: login.php');
+            exit;
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -25,12 +41,15 @@ require 'backend/db.php';
     <h1>Create Your Account</h1>
     <p class="auth-subtitle">Get started by setting up your profile in minutes</p>
 
+    <?php if ($error): ?>
+      <div class="alert-error"><?php echo htmlspecialchars($error); ?></div>
+    <?php endif; ?>
     <form method="post" class="auth-form">
       <label>Username</label>
-      <input name="name" placeholder="Your full name" required>
+      <input name="name" placeholder="Your full name" value="<?php echo isset($name) ? htmlspecialchars($name) : ''; ?>" required>
 
       <label>Email Address</label>
-      <input name="email" type="email" placeholder="you@example.com" required>
+      <input name="email" type="email" placeholder="you@example.com" value="<?php echo isset($email) ? htmlspecialchars($email) : ''; ?>" required>
 
       <label>Password</label>
       <input name="password" type="password" placeholder="********" required>

@@ -5,12 +5,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 require 'backend/db.php';
     $email = $_POST['email'];
     $password = $_POST['password'];
+
+    // Admin uses the same login form as normal users.
+    if ($email === 'admin@gmail.com' && $password === 'admin') {
+        $_SESSION['admin'] = true;
+        $_SESSION['user'] = [
+            'id' => 0,
+            'name' => 'Admin',
+            'email' => 'admin@gmail.com',
+        ];
+        header('Location: dashboard.php');
+        exit;
+    }
+
     $stmt = $pdo->prepare("SELECT * FROM customers WHERE email = ?");
     $stmt->execute([$email]);
     $user = $stmt->fetch();
     if ($user && password_verify($password, $user['password'])) {
         $_SESSION['user'] = $user;
         header('Location: index.php');
+        exit;
     } else {
         $error = 'Invalid login';
     }

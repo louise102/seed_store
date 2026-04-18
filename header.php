@@ -18,7 +18,7 @@
       }
       if (isset($_SESSION['admin'])): ?>
         <a href="dashboard.php" style="background: var(--accent2); color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 700; text-decoration: none; margin-left: 12px;">Admin Dashboard</a>
-        <a href="admin.logout.php">Admin Logout</a>
+        <a href="logout.php">Logout</a>
       <?php elseif (isset($_SESSION['user'])): ?>
         <a href="profile.php">Profile</a>
         <a href="logout.php">Logout</a>
